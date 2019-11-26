@@ -1,0 +1,501 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<title>Vetwork - Propriet&aacute;rios</title>
+
+<%= javascript_include_tag "jquery-1.3.2.min", "jquery-ui-1.7.2.custom.min", "application" %>
+<%= javascript_include_tag "auto_complete/jquery.autocomplete.pack", "auto_complete/jquery.ajaxQueue", "auto_complete/thickbox-compressed", "auto_complete/jquery.bgiframe.min" %>
+<%= javascript_include_tag "validate/jquery.validate.min" %>
+<%= javascript_include_tag "jquery-ui-1.7.3.dialog.min" %>
+<%= javascript_include_tag "masked/jquery.maskedinput-1.2.2" %>
+
+<%= stylesheet_link_tag "jquery-ui-1.7.2.custom", "general_style" %>
+<%= stylesheet_link_tag "auto_complete/jquery.autocomplete" %>
+
+<%= render :partial => "shared/css_common" %>
+
+
+<script type="text/javascript">
+
+jQuery.ajaxSetup({"beforeSend" : function(xhr){xhr.setRequestHeader("Accept", "text/javascript")}});
+
+function maskphone() {
+    var last = $(this).val().substr( $(this).val().indexOf("-") + 1 );
+
+    if( last.length == 5 ) {
+        var move = $(this).val().substr( $(this).val().indexOf("-") + 1, 1 );
+
+        var lastfour = last.substr(1,4);
+
+        var first = $(this).val().substr( 0, 9 );
+
+        $(this).val( first + move + '-' + lastfour );
+    }
+}
+jQuery(function($){
+  $('.cpf-cnpj').change(function(){
+    var campo = $(this).val();
+    if (campo == "cpf"){	
+      $(".txtCPF").val('');
+      $(".txtCPF").mask("999.999.999-99");
+      $(".txtSearchCPF").val('');
+      $(".txtSearchCPF").mask("999.999.999-99");
+    }
+    else if (campo == "cnpj"){
+      $(".txtCPF").val('');
+      $(".txtCPF").mask("99.999.999/9999-99");
+      $(".txtSearchCPF").val('');
+      $(".txtSearchCPF").mask("99.999.999/9999-99");
+    }			
+  });
+});
+$(document).ready(function(){
+
+	$(".txtPhone1").mask("(99) 9999-9999?9");
+	$(".txtPhone2").mask("(99) 9999-9999?9");
+	$(".txtPhone3").mask("(99) 9999-9999?9");
+
+    $(".txtPhone1").blur(maskphone).trigger('blur');
+    $(".txtPhone2").blur(maskphone).trigger('blur');
+    $(".txtPhone3").blur(maskphone).trigger('blur');
+
+	$(".txtPostalCode").mask("99999-999");
+
+	$(".txtSearchPhone").mask("(99) 9999-9999?9");
+
+    initDatePicker();
+
+	$(".txtCity").autocomplete("/animal_owner/autocomplete_city", {multiple: false, cacheLength: 20, delay: 40, max: 25, minChars: 3});
+	$("#txtSpecieSearch").autocomplete("/animal/specie_auto_complete", {multiple: false, cacheLength: 20, delay: 40, max: 25, minChars: 2});
+	$("#txtBreedSearch").autocomplete("/animal/breed_auto_complete", {multiple: false, cacheLength: 20, delay: 40, max: 25, minChars: 2, extraParams: {'specie': $("#txtSpecieSearch").val()}});
+
+    jQuery.validator.addClassRules({
+	    txtName :  { required : true  },
+        txtPhone1 :  { required :  true },
+        txtState : { required : false, minlength: 2 },
+        txtEmail1 :  { required :  false, email: true },
+        txtEmail2 :  { required :  false, email: true }
+    });
+    jQuery.validator.messages.required = "";
+    jQuery.validator.messages.digits = "";
+    jQuery.validator.messages.minlength = "";
+    jQuery.validator.messages.email = "";
+
+    $("#NewAnimalOwnerForm").validate({
+        messages: {
+            "animal_owner[state]" : { digits : " Estado inválido", minlength : " Estado inválido" },
+            "animal_owner[email1]" : { email : " E-mail inválido" },
+            "animal_owner[email2]" : { email : " E-mail inválido" }
+        },
+        invalidHandler: function(e, validator) {
+            $("#NewAnimalOwnerError").show();
+        },
+		submitHandler: function(form){
+
+      $("#NewAnimalOwnerError").hide();
+      $("#NewAnimalOwnerServerError").hide();
+			$.post($(form).attr("action"), $(form).serialize(), null, "script");
+		}
+    });
+
+	$("#search_form").submit(function(){
+		$("#search_status").show();
+		$.post($(this).attr("action"), $(this).serialize(), function(){$("#search_status").hide()}, "script");
+		return false;
+	});
+
+	$("#txtSpecieSearch").keyup(function(){
+
+		if($("#txtSpecieSearch").val() == ""){
+
+			$("#txtBreedSearch").val("");
+			$("#txtBreedSearch").attr("readonly", "readonly");
+		}
+		else{
+			$("#txtBreedSearch").attr("readonly", false);
+		}
+
+	});
+
+	$("#txtSpecieSearch").blur(function(){
+
+		if($("#txtSpecieSearch").val() == ""){
+
+			$("#txtBreedSearch").val("");
+			$("#txtBreedSearch").attr("readonly", "readonly");
+		}
+		else{
+			$("#txtBreedSearch").attr("readonly", false);
+		}
+
+		$("#txtBreedSearch").setOptions({extraParams: {'specie': $("#txtSpecieSearch").val()}});
+
+	});
+
+});
+
+function initDatePicker(){
+
+    $(".txtBirthday").datepicker({ dateFormat: 'dd/mm/yy', changeYear: true, maxDate: '+0d', minDate: '-100y', yearRange: '-100:+0', dayNamesMin: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'], nextText: 'Próximo', prevText: 'Anterior', showAnim: 'show' });
+}
+
+function clearFields(){
+
+    $("#NewAnimalOwnerForm").validate().resetForm();
+    $("#NewAnimalOwnerError").hide();
+    $("#NewAnimalOwnerServerError").hide();
+
+    $(".txtName").val("");
+    $(".txtPhone1").val("");
+    $(".fldSex").val("");
+    $(".txtBirthday").val("");
+    $(".txtCPF").val("");
+    $(".txtIdentity").val("");
+    $(".txtAddress").val("");
+    $(".txtCity").val("");
+    $(".txtState").val("");
+    $(".txtPostalCode").val("");
+    $(".txtPhone2").val("");
+    $(".txtPhone3").val("");
+    $(".txtEmail1").val("");
+    $(".txtEmail2").val("");
+}
+
+</script>
+
+<style type="text/css">
+
+.requiredInput{
+
+    display: inline;
+}
+
+.proprietario_bloco{
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.proprietario_detalhes{
+    display: block;
+    font-size: 12px;
+    color: #999999;
+}
+</style>
+</head>
+
+<body>
+
+	<%= render :partial => "shared/top_header" %>
+
+
+<table width="100%" height="100%" border="0" cellpadding="5" cellspacing="0">
+  <tr>
+    <td width="50%" valign="top" style="padding-left: 15px; padding-top: 5px">
+
+        <%= form_tag({:action => 'search'}, :id => 'search_form') do %>
+          <INPUT TYPE="image" SRC="/images/atualizando.gif" HEIGHT="0" WIDTH="0" BORDER="0">
+
+		<div style="background-color: #FDF3DB; padding: 5px;">
+            <span style="font-size: 18px; font-weight: bold; display: block; padding-bottom: 15px; color: #943814">Buscar proprietário pelo nome:</span>
+                <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 5px">
+                    <tr>
+                        <td style="padding-right: 10px; width: auto;">
+							<%= text_field_tag :animal_owner_name, nil, :style => "width: 100%; font-size:20px;" %>
+						</td>
+                        <td style="padding-left: 15px; ">
+                          <a class="buttonM bGreyish" onclick="$('#search_form').submit()"><span class="icon-search"></span><span>Buscar</span></a>
+						</td>
+                    </tr>
+                </table>
+                <a style="font-size: 11px;" class="label_button" onclick="$('#advancedsearch').slideDown()">ou clique aqui e faça uma busca avançada com mais opções</a>
+            <div id="advancedsearch" style="display: none">
+                <table width="100%" cellpadding="0" border="0" cellspacing="0" style="display: block; padding-top: 10px; padding-bottom: 5px">
+                    <tr>
+                       <div>
+                       <form>
+                       <input type="radio" class="cpf-cnpj" id="cpf-cnpj" name="cpf/cnpj checked" value="cpf"> CPF<br>
+                       <input type="radio" class="cpf-cnpj" id="cpf-cnpj" name="cpf/cnpj" value="cnpj"> CNPJ<br>
+                        <form>
+                        </div>
+                        <td width="25%" style="padding-bottom: 5px;">
+							<%= text_field_tag :animal_owner_cpf, nil, :style => "width: 110px; font-size:12px;", :class => "txtSearchCPF" %>
+						</td>
+						<td width="25%" style="padding-bottom: 5px; padding-right: 5px; text-align: right;"><span style="font-size: 11px; white-space: nowrap; text-align: right;">Telefone:</span></td>
+						<td width="25%" style="padding-bottom: 5px;">
+							<%= text_field_tag :animal_owner_phone, nil, :style => "width: 100px; font-size:12px;", :class => "txtSearchPhone", :myvalue => "#{current_user.vetwork_customer.area_code}" %>
+						</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 5px; padding-right: 5px; text-align: right;"><span style="font-size: 11px; white-space: nowrap;">Nome do animal:</span></td>
+                        <td style="padding-bottom: 5px;" colspan="3">Installing acts_as_xlsx 1.0.6
+Fetching afm 0.2.2
+Installing afm 0.2.2
+Fetching authlogic 3.0.2
+Installing authlogic 3.0.2
+Fetching json 1.7.3
+Installing json 1.7.3 with native extensions
+Fetching uuidtools 2.1.5
+Installing uuidtools 2.1.5
+Fetching aws-sdk 1.16.1
+Installing aws-sdk 1.16.1
+Fetching thread_safe 0.3.6
+Installing thread_safe 0.3.6
+Fetching descendants_tracker 0.0.4
+Installing descendants_tracker 0.0.4
+Fetching ice_nine 0.11.2
+Installing ice_nine 0.11.2
+Fetching axiom-types 0.1.1
+Installing axiom-types 0.1.1
+Using barkick 0.1.0 from https://github.com/odairbr/barkick.git (at master@fd0bf0e)
+Using bundler 1.17.2
+Fetching chunky_png 1.3.11
+Installing chunky_png 1.3.11
+Fetching coderay 1.1.2
+Installing coderay 1.1.2
+Fetching coercible 1.0.0
+Installing coercible 1.0.0
+Fetching daemons 1.3.1
+Installing daemons 1.3.1
+Fetching database_cleaner 1.7.0
+Installing database_cleaner 1.7.0
+Fetching declarative_authorization 0.5.7
+Installing declarative_authorization 0.5.7
+Fetching delayed_job 4.1.5
+Installing delayed_job 4.1.5Installing acts_as_xlsx 1.0.6
+Fetching afm 0.2.2
+Installing afm 0.2.2
+Fetching authlogic 3.0.2
+Installing authlogic 3.0.2
+Fetching json 1.7.3
+Installing json 1.7.3 with native extensions
+Fetching uuidtools 2.1.5
+Installing uuidtools 2.1.5
+Fetching aws-sdk 1.16.1
+Installing aws-sdk 1.16.1
+Fetching thread_safe 0.3.6
+Installing thread_safe 0.3.6
+Fetching descendants_tracker 0.0.4
+Installing descendants_tracker 0.0.4
+Fetching ice_nine 0.11.2
+Installing ice_nine 0.11.2
+Fetching axiom-types 0.1.1
+Installing axiom-types 0.1.1
+Using barkick 0.1.0 from https://github.com/odairbr/barkick.git (at master@fd0bf0e)
+Using bundler 1.17.2
+Fetching chunky_png 1.3.11
+Installing chunky_png 1.3.11
+Fetching coderay 1.1.2
+Installing coderay 1.1.2
+Fetching coercible 1.0.0
+Installing coercible 1.0.0
+Fetching daemons 1.3.1
+Installing daemons 1.3.1
+Fetching database_cleaner 1.7.0
+Installing database_cleaner 1.7.0
+Fetching declarative_authorization 0.5.7
+Installing declarative_authorization 0.5.7
+Fetching delayed_job 4.1.5
+Installing delayed_job 4.1.5
+Fetching delayed_job_active_record 4.1.3
+Installing delayed_job_active_record 4.1.3
+Fetching diff-lcs 1.3
+Installing diff-lcs 1.3
+Fetching docile 1.1.5
+Installing docile 1.1.5
+
+Fetching delayed_job_active_record 4.1.3
+Installing delayed_job_active_record 4.1.3
+Fetching diff-lcs 1.3
+Installing diff-lcs 1.3
+Fetching docile 1.1.5
+Installing docile 1.1.5
+
+							<%= text_field_tag :animal_name, nil, :style => "width: 150px; font-size:12px;", :maxlenght => 255 %>
+						</td>
+                    </tr>
+					<tr>
+						<td style="padding-right: 5px; text-align: right;"><span style="font-size: 11px; white-space: nowrap;">Espécie:</span></td>
+                        <td>
+							<%= text_field_tag :specie, "", :size => 15, :maxlength => 255, :class => "txtSpecieSearch", :style => "width: 100px; font-size:12px; display: inline", :id => "txtSpecieSearch" %>
+                        </td>
+                        <td style="padding-right: 5px; text-align: right;"><span style="font-size: 11px; white-space: nowrap;">Raça:</span></td>
+                        <td>
+							<%= text_field_tag :breed_name, "", :size => 10, :maxlength => 255, :class => "txtBreedSearch", :style => "width: 150px; font-size:12px; display: inline", :id => "txtBreedSearch", :readonly => "true" %>
+                        </td>
+					</tr>
+                </table>
+            </div>
+        </div>
+        <% end %>
+
+        <div id="search_status" style="display: none">Aguarde, buscando proprietários...</div>
+		<div class="ui-widget" id="Limit" style="display: none">
+	           <div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; margin-bottom: 5px; padding: 0 .7em; text-align: left;">
+	               <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><span id="LimitMessage"></span></p>
+	           </div>
+	    </div>
+
+        <div id="searchresult"></div>
+
+
+    </td>
+
+    <td height="100%" valign="middle"><div style="background-color:#CCCCCC; height: 85%; width: 2px"> </div></td>
+
+    <td width="50%" valign="top" style="padding-right: 15px; padding-top: 5px">
+        <%= form_for :animal_owner, :url => { :action => :new }, :html => {:id => "NewAnimalOwnerForm"} do |form| %>
+
+			<%= hidden_field_tag("confirm_cpf", "", {:id => "hddConfirmCPF"}) %>
+			<%= hidden_field_tag("confirm_phone", "", {:id => "hddConfirmPhone"}) %>
+
+		<div style="background-color: #D8F2E1; padding: 5px;">
+            <span style="font-size: 18px; font-weight: bold; display: block; padding-bottom: 15px; color: #006363">Cadastrar novo proprietário:</span>
+            <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 5px; padding-left: 5px;">
+                <tr>
+                    <td width="10%"><span class="required-label">Nome:</span></td>
+                    <td width="90%" style="padding-left: 15px; padding-right: 15px; padding-bottom: 5px;">
+						<%= form.text_field :name, :size => 50, :maxlength => 255, :class => "txtName", :style => "width: 80%; font-size:12px; display: inline" %>
+					</td>
+                </tr>
+                <tr>
+                    <td width="10%"><span class="required-label">Telefone:</span></td>
+                    <td width="90%" style="padding-left: 15px; padding-right: 15px">
+						<%= form.select(:phone_type1, %w{ Celular Residencial Comercial }, {}, {:class => "fldPhoneType1", :style => "font-size:12px; width: 110px; display: inline"})%>
+                        <span style="padding-left: 5px;">
+							<%= form.text_field :phone1, :size => 15, :class => "txtPhone1", :style => "width: 120px; font-size:12px;", :myvalue => "#{current_user.vetwork_customer.area_code}" %>
+						</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+       <table border="0" cellspacing="0" cellpadding="0" style="padding-top: 5px; padding-left: 10px; padding-bottom: 5px;" width="100%">
+            <tr>
+                <td width="10%">
+                    <span class="label">Sexo:</span>
+                </td>
+                <td width="40%" style="padding-left: 5px;">
+                  <%= form.select(:sex, Gender.human.for_options, {:prompt => "--selecionar--"}, {:class => "txtSex", :style => "font-size:12px;"})%>
+                </td>
+                <td width="10%">
+                  <span class="label">Nascimento:</span>
+                </td>
+                <td width="40%" style="padding-right: 10px; padding-left: 5px;">
+					<%= text_field_tag(:birthday, "", :size => 15, :maxlength => 10, :id => "txtBirthday", :class => "txtBirthday", :style => "width: 120px; font-size:12px;")%>
+				</td>
+            </tr>
+            <tr>
+                <td width="10%" style="padding-top: 10px;">
+                    <input type="radio" class="cpf-cnpj" id="cpf-cnpj" name="cpf/cnpj" value="cpf"> CPF<br>
+                    <input type="radio" class="cpf-cnpj" id="cpf-cnpj" name="cpf/cnpj" value="cnpj"> CNPJ<br>
+                </td>
+                <td width="40%" style="padding-left: 5px; padding-top: 10px;">
+					<%= form.text_field :cpf, :size => 15, :class => "txtCPF", :style => "width: 120px; font-size:12px;" %>
+				</td>
+                <td width="10%" style="padding-top: 10px;">
+                    <span class="label">Identidade:</span>
+                </td>
+                <td width="40%" style="padding-right: 10px; padding-left: 5px; padding-top: 10px;">
+					<%= form.text_field :identity, :size => 15, :maxlength => 50, :class => "txtIdentity", :style => "width: 120px; font-size:12px;" %>
+				</td>
+            </tr>
+       </table>
+
+      <span style="font-size: 14px; display: block; padding-bottom: 5px; padding-top: 5px; padding-left: 5px; color: #006363;">Dados para contato:</span>
+	  <table border="0" cellspacing="0" cellpadding="0" width="100%" style="padding-bottom: 5px; padding-left: 10px; padding-top: 5px;">
+        <tr>
+			<td width="10%" style="padding-top: 5px;"><span class="label">Endereço:</span></td>
+			<td width="90%" style="padding-top: 5px; padding-left: 15px; padding-right: 15px" colspan="3">
+				<%= form.text_field :address, :size => 30, :maxlength => 255, :class => "txtAddress", :style => "width: 90%; font-size:12px;" %>
+			</td>
+		</tr>
+		<tr>
+              <td width="10%" style="padding-right: 5px;padding-top: 5px;">
+                  <span class="label">Cidade:</span>
+              </td>
+              <td width="40%" style="padding-left: 15px; padding-right: 5px; padding-top: 5px;">
+					<%= form.text_field :city, :size => 30, :maxlength => 255, :class => "txtCity", :style => "width: 90%; font-size:12px;", :value => current_user.vetwork_customer.city %>
+              </td>
+              <td style="padding-right: 5px; white-space: nowrap; padding-top: 5px;" align="center">
+                  	<span style="color: #555555; font-size: 11px">Estado:</span>
+					<span style="padding-left: 5px; padding-top: 5px;">
+						<%= form.text_field :state, :size => 5, :maxlength => 2, :class => "txtState", :style => "width: 30px; font-size:12px;", :value => current_user.vetwork_customer.state %>
+					</span>
+              </td>
+              <td width="30%" style="padding-right: 10px; white-space: nowrap; padding-top: 5px;" align="left">
+                 	<span style="color: #555555; font-size: 11px; padding-top: 5px;">CEP:</span>
+					<span style="padding-left: 5px; padding-top: 5px;">
+						<%= form.text_field :postal_code, :size => 10, :class => "txtPostalCode", :style => "width: 80px; font-size:12px;" %>
+					</span>
+              </td>
+          </tr>
+		<tr>
+            <td width="10%" style="padding-top: 5px;"><span class="label">Telefone:</span></td>
+            <td width="90%" style="padding-top: 5px; padding-left: 15px; padding-right: 15px" colspan="3">
+                <%= form.select(:phone_type2, %w{ Residencial Celular Comercial }, {}, {:class => "fldPhoneType2", :style => "font-size:12px; width: 110px; display: inline"})%>
+                <span style="padding-left: 5px;">
+					<%= form.text_field :phone2, :size => 15, :class => "txtPhone2", :style => "width: 120px; font-size:12px;", :myvalue => "#{current_user.vetwork_customer.area_code}" %>
+				</span>
+            </td>
+        </tr>
+        <tr>
+            <td width="10%" style="padding-top: 5px;"><span class="label">Telefone:</span></td>
+            <td width="90%" style="padding-top: 5px; padding-left: 15px; padding-right: 15px" colspan="3">
+                <%= form.select(:phone_type3, %w{ Comercial Residencial Celular }, {}, {:class => "fldPhoneType3", :style => "font-size:12px; width: 110px; display: inline"})%>
+                <span style="padding-left: 5px;">
+					<%= form.text_field :phone3, :size => 15, :class => "txtPhone3", :style => "width: 120px; font-size:12px;", :myvalue => "#{current_user.vetwork_customer.area_code}" %>
+				</span>
+            </td>
+        </tr>
+        <tr>
+            <td width="10%" style="padding-top: 5px;"><span class="label">E-mail:</span></td>
+            <td width="90%" style="padding-top: 5px; padding-left: 15px; padding-right: 15px" colspan="3">
+				<%= form.text_field :email1, :size => 80, :maxlength => 255, :class => "txtEmail1", :style => "width: 60%; font-size:12px;" %>
+			</td>
+        </tr>
+        <tr>
+            <td width="10%" style="padding-top: 5px;"><span class="label">E-mail:</span></td>
+            <td width="90%" style="padding-top: 5px; padding-left: 15px; padding-right: 15px" colspan="3">
+				<%= form.text_field :email2, :size => 80, :maxlength => 255, :class => "txtEmail2", :style => "width: 60%; font-size:12px;" %>
+			</td>
+        </tr>
+      </table>
+      <center>
+          <div class="ui-widget" id="NewAnimalOwnerError" style="display: none">
+                <div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; margin-bottom: 5px; padding: 0 .7em; text-align: left;">
+                    <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><b>Verifique os campos de preenchimento obrigatório ou com erros!</b></p>
+                </div>
+           </div>
+
+           <div class="ui-widget" id="NewAnimalOwnerServerError" style="display: none">
+               <div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; margin-bottom: 5px; padding: 0 .7em; text-align: left;">
+                   <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><span id="ErrorMessage"></span></p>
+               </div>
+           </div>
+           <% unless current_user.vetwork_customer.temp_block %>
+                <a class="buttonL bGreen" onclick="$('#NewAnimalOwnerForm').submit()" id="new_animal_owner_button"><span class="icon-checkmark"></span><span>Cadastrar proprietário</span></a> |
+                <a class="clear_fields_button" onclick="clearFields()">Limpar campos</a>
+           <% end %>
+      <% end %>
+
+      <% unless current_user.vetwork_customer.temp_block %>
+        <% if has_role?(:admin) or has_role?(:manager) %>
+          <p><a class="buttonL bGreen" id="export_owners_and_animals_button" href="/animal_owner/export_owners_and_animals">
+              <span class="icon-checkmark"></span>
+              <span>Exportar proprietários e animais</span>
+          </a></p>
+        <% end %>
+      <% end %>
+      </center>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+
+
