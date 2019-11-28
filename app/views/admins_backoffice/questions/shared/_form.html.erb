@@ -25,14 +25,14 @@
                             
                             <div class="form-group">
                                 <%= form.label :description%>
-                                <%=form.text_area :description, class:"form-control", placeholder:"Question Description", rows: 5 %>
+                                <%=form.text_area :description, class:"form-control", placeholder:t("messages.description"), rows: 5 %>
                             </div>
                             <div class="form-group">
                                 <%= form.label :subject%>
                                 <%= form.collection_select(:subject_id, @subjects, :id, :description,{}, class:"form-control")%>
                             </div>                            
                             
-                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="submit" class="btn btn-primary"><%=t('messages.save')%></button>
                         
                         <% end %>
                     </div>

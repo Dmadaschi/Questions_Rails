@@ -2,3 +2,8 @@ pt-BR:
   messages:
     listing: Listando %{model}
     confirm: Deseja realmente exluir '%{item}' ?
+    save: Salvar
+    description: Descrição
+    password: Senha
+    email: Email
+    confirm_password: Confirme a senha
