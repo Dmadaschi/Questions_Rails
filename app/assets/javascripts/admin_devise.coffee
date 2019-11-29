@@ -6,4 +6,3 @@
 //= require jquery-easing/jquery.easing.1.3
 //= require sb-admin-2
 //= require bootstrap-growl-ifightcrime/jquery.bootstrap-growl
-//= require cocoon

@@ -49,7 +49,8 @@ class AdminsBackoffice::QuestionsController < AdminsBackofficeController
   end
 
   def params_subject
-    params.require(:question).permit(:description)
+    params.require(:question).permit(:description, :subject_id,
+                                     answers_attributes: %i[id description done _destroy])
   end
 
   def find_subjects

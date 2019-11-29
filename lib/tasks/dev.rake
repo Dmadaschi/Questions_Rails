@@ -12,8 +12,8 @@ namespace :dev do
       show_spinner('creating default admin') { `rails dev:add_default_admin` }
       show_spinner('creating extra admins') { `rails dev:add_aditional_admins` }
       show_spinner('creating default user') { `rails dev:add_default_user` }
-      show_spinner('deating default subjects') { `rails dev:add_subjects` }
-      show_spinner('deating default qestions and answares') { `rails dev:add_questions` }
+      show_spinner('ceating default subjects') { `rails dev:add_subjects` }
+      show_spinner('ceating default qestions and answares') { `rails dev:add_questions_answares` }
     else
       puts 'You are not in development envoirement'
     end
@@ -59,15 +59,42 @@ namespace :dev do
   end
 
   desc 'Add default Questions and Answares'
-  task add_questions: :environment do
+  task add_questions_answares: :environment do
     Subject.all.each do |subject|
-      rand(5..10).times do |_i|
-        Question.create!(
-          description: "#{Faker::Lorem.paragraph} #{Faker::Lorem.question}",
-          subject: subject
-        )
+      rand(2..6).times do |_i|
+        params = create_question_params(subject)
+        answers_array = params[:question][:answers_attributes]
+
+        add_answers(answers_array)
+        elect_true_answer(answers_array)
+
+        Question.create!(params[:question])
       end
     end
+  end
+  def create_answer_params(option = false)
+    { description: Faker::Lorem.sentence, correct: option }
+  end
+
+  def add_answers(answers_array)
+    rand(2..5).times do |_j|
+      answers_array.push(
+        create_answer_params
+      )
+    end
+  end
+
+  def elect_true_answer(answers_array)
+    index = rand(answers_array.size)
+    answers_array[index] = create_answer_params(true)
+  end
+
+  def create_question_params(subject = Subject.all.sample)
+    { question: {
+      description: "#{Faker::Lorem.paragraph} #{Faker::Lorem.question}",
+      subject: subject,
+      answers_attributes: []
+    } }
   end
 
   def show_spinner(msg_start, _msg_end = 'Done')

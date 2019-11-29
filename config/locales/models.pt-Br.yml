@@ -36,3 +36,4 @@
         subject_id: Assunto
         created_at: Criado em
         updated_at: Atualizado em
+        add_answare: "Adcionar Questão"

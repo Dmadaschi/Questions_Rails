@@ -1,0 +1,39 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html >
+
+<head>
+    <%= stylesheet_link_tag    'application'%>
+    <%= stylesheet_link_tag    'admin_devise'%>
+
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Ecomerce</title>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+</head>
+
+<body class="bg-gradient-primary">
+
+  <div class="container">
+        <%= yield %>
+
+  </div>
+
+  <%= javascript_include_tag 'application'%>
+  <%= javascript_include_tag 'admin_devise'%>
+
+</body>
+
+</html>

@@ -18,9 +18,12 @@ Rails.application.config.assets.precompile += %w[custom.min.js custom.css]
 Rails.application.config.assets.precompile += %w[sb-admin.js sb-admin.css]
 Rails.application.config.assets.precompile += %w[img.jpg]
 
+
 Rails.application.config.assets.precompile += %w[
   admins_backoffice.js
   admins_backoffice.css
+  admin_devise.js
+  admin_devise.css
 ]
 Rails.application.config.assets.precompile += %w[
   users_backoffice.js
